@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+import models
 from datetime import datetime
 from uuid import uuid4
 
@@ -11,13 +13,23 @@ class BaseModel:
              *args (any argument): unused
              **kwargs (dictionaty): key value pair of arguments
         """
+        TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
         self.id = str(uuid4())
         self.created_at = datetime.today()
         self.updated_at = datetime.today()
+        models.storage.new(self)
+
+        if len(kwargs) != 0:
+            for k, v in kwargs.items():
+                if k == "created_at" or k == "updated_at":
+                    self.__dict__[k] = datetime.strptime(v, TIME_FORMAT)
+                else:
+                    self.__dict__[k] = v
 
     def save(self):
         """updates the updated_at attribute to the current datetime"""
         self.updated_at = datetime.today()
+        models.storage.save()
 
     def to_dict(self):
         """ returns the dict rep of the Basemodel instance
