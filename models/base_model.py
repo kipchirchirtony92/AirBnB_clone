@@ -17,7 +17,6 @@ class BaseModel:
         self.id = str(uuid4())
         self.created_at = datetime.today()
         self.updated_at = datetime.today()
-        models.storage.new(self)
 
         if len(kwargs) != 0:
             for k, v in kwargs.items():
@@ -25,6 +24,8 @@ class BaseModel:
                     self.__dict__[k] = datetime.strptime(v, TIME_FORMAT)
                 else:
                     self.__dict__[k] = v
+        else:
+            models.storage.new(self)
 
     def save(self):
         """updates the updated_at attribute to the current datetime"""
