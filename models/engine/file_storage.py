@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ Module for FileStorage class """
 import json
-import models
+import os
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
@@ -12,8 +12,7 @@ from models.review import Review
 
 
 class FileStorage:
-    """ Serializes instances to a JSON file and deserializes JSON file to
-    instances """
+    """ FileStorage class """
     __file_path = "file.json"
     __objects = {}
 
@@ -23,7 +22,7 @@ class FileStorage:
 
     def new(self, obj):
         """ Sets in __objects the obj with key <obj class name>.id """
-        key = "{}.{}".format(obj.__class__.__name__, obj.id)
+        key = obj.__class__.__name__ + "." + obj.id
         FileStorage.__objects[key] = obj
 
     def save(self):
@@ -36,20 +35,10 @@ class FileStorage:
 
     def reload(self):
         """ Deserializes the JSON file to __objects (only if the JSON file
-        (__file_path) exists ; otherwise, do nothing. If the file doesn’t exist,
-        no exception should be raised) """
-        try:
+            (__file_path) exists ; otherwise, do nothing. If the file doesn’t
+            exist, no exception should be raised) """
+        if os.path.exists(FileStorage.__file_path):
             with open(FileStorage.__file_path, "r") as f:
                 new_dict = json.load(f)
-            for key, value in new_dict.items():
-                FileStorage.__objects[key] = eval(value["__class__"])(**value)
-        except FileNotFoundError:
-            pass
-
-    def delete(self, obj=None):
-        """ delete obj from __objects if it’s inside """
-        if obj is not None:
-            key = "{}.{}".format(obj.__class__.__name__, obj.id)
-            if key in FileStorage.__objects:
-                del FileStorage.__objects[key]
-                self.save()
+                for key, value in new_dict.items():
+                    FileStorage.__objects[key] = eval(value["__class__"])(**value)
