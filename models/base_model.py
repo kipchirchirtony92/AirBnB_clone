@@ -1,49 +1,44 @@
 #!/usr/bin/python3
-import models
+""" This module contains the BaseModel class """
+import uuid
 from datetime import datetime
-from uuid import uuid4
+import models
 
 
 class BaseModel:
-    """ represents the base model of the AirBnb project"""
-
+    """ This is the BaseModel class """
     def __init__(self, *args, **kwargs):
-        """initialization of the base model class
-         Args:
-             *args (any argument): unused
-             **kwargs (dictionaty): key value pair of arguments
-        """
-        TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
-        self.id = str(uuid4())
-        self.created_at = datetime.today()
-        self.updated_at = datetime.today()
-
-        if len(kwargs) != 0:
-            for k, v in kwargs.items():
-                if k == "created_at" or k == "updated_at":
-                    self.__dict__[k] = datetime.strptime(v, TIME_FORMAT)
-                else:
-                    self.__dict__[k] = v
+        """ This is the __init__ method """
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == "created_at" or key == "updated_at":
+                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                if key != "__class__":
+                    setattr(self, key, value)
         else:
+            self.id = str(uuid.uuid4())
+            self.created_at = self.updated_at = datetime.now()
             models.storage.new(self)
 
+    def __str__(self):
+        """ This is the __str__ method """
+        return "[{}] ({}) {}".format(self.__class__.__name__, self.id,
+                                     self.__dict__)
+
     def save(self):
-        """updates the updated_at attribute to the current datetime"""
-        self.updated_at = datetime.today()
+        """ This is the save method """
+        self.updated_at = datetime.now()
         models.storage.save()
 
     def to_dict(self):
-        """ returns the dict rep of the Basemodel instance
+        """ This is the to_dict method """
+        new_dict = self.__dict__.copy()
+        new_dict["__class__"] = self.__class__.__name__
+        new_dict["created_at"] = self.created_at.isoformat()
+        new_dict["updated_at"] = self.updated_at.isoformat()
+        return new_dict
 
-        includes the __class__ attribute which rep the class name of the object
-        """
-        tmpdict = self.__dict__.copy()
-        tmpdict["created_at"] = self.created_at.isoformat()
-        tmpdict["updated_at"] = self.updated_at.isoformat()
-        tmpdict["__class__"] = self.__class__.__name__
-        return tmpdict
+    def delete(self):
+        """ This is the delete method """
+        models.storage.delete(self)
 
-    def __str__(self):
-        """ Returns the string rep of the Basemodel instance."""
-        clsname = self.__class__.__name__
-        return f"[{clsname}] ({self.id}) {self.__dict__}"
