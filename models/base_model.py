@@ -41,4 +41,3 @@ class BaseModel:
     def delete(self):
         """ This is the delete method """
         models.storage.delete(self)
-

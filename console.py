@@ -72,7 +72,7 @@ class HBNBCommand(cmd.Cmd):
                 key = argv[0] + "." + argv[1]
                 del storage.all()[key]
                 storage.save()
-            except NoInstanceError:
+            except Error:
                 print("** no instance found **")
 
     def do_all(self, argv):
@@ -109,5 +109,4 @@ class HBNBCommand(cmd.Cmd):
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
-
-
+    
